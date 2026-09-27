@@ -35,11 +35,11 @@ import slick.codegen.SourceCodeGenerator
 import slick.{ model => m }
 
 // required
-slickCodegenSettings
+enablePlugins(CodegenPlugin)
 
 // required
 // Register codegen hook
-sourceGenerators in Compile <+= slickCodegen
+Compile / sourceGenerators += slickCodegen
 
 // required
 slickCodegenDatabaseUrl := "jdbc:postgresql://localhost/example"
@@ -51,7 +51,7 @@ slickCodegenDatabaseUser := "dbuser"
 slickCodegenDatabasePassword := "dbpassword"
 
 // required (If not set, postgresql driver is choosen)
-slickCodegenDriver := slick.driver.PostgresDriver
+slickCodegenDriver := slick.jdbc.PostgresProfile
 
 // required (If not set, postgresql driver is choosen)
 slickCodegenJdbcDriver := "org.postgresql.Driver"
@@ -64,14 +64,14 @@ slickCodegenCodeGenerator := { (model: m.Model) => new SourceCodeGenerator(model
 
 // optional
 // For example of all the tables in a database we only would like to take table named "users"
-slickCodegenIncludedTables in Compile := Seq("users")
+Compile / slickCodegenIncludedTables := Seq("users")
 
 // optional
 // For example, to exclude flyway's schema_version table from the target of codegen. This still applies after slickCodegenIncludedTables.
-slickCodegenExcludedTables in Compile := Seq("schema_version")
+Compile / slickCodegenExcludedTables := Seq("schema_version")
 
 //optional
-slickCodegenOutputDir := (sourceManaged in Compile).value
+slickCodegenOutputDir := (Compile / sourceManaged).value
 
 //optional. Generate one Scala file per table.
 slickCodegenOutputToMultipleFiles := false
