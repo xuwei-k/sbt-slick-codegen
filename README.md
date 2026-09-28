@@ -1,6 +1,6 @@
 # sbt-slick-codegen
 
-[![Build and Test](https://github.com/tototoshi/sbt-slick-codegen/actions/workflows/build-test.yml/badge.svg)](https://github.com/tototoshi/sbt-slick-codegen/actions/workflows/build-test.yml)
+[![Continuous Integration](https://github.com/tototoshi/sbt-slick-codegen/actions/workflows/ci.yml/badge.svg)](https://github.com/tototoshi/sbt-slick-codegen/actions/workflows/ci.yml)
 
 slick-codegen compile hook for sbt
 
@@ -20,12 +20,14 @@ slick-codegen compile hook for sbt
 ```scala
 // plugins.sbt
 
-addSbtPlugin("com.github.tototoshi" % "sbt-slick-codegen" % slickCodegenVersion)
+addSbtPlugin("com.github.sbt" % "sbt-slick-codegen" % slickCodegenVersion)
 
 // Database driver
 // For example, when you are using PostgreSQL
 libraryDependencies += "org.postgresql" % "postgresql" % "9.4-1201-jdbc41"
 ```
+
+Releases through 2.2.0 use the previous group ID, `com.github.tototoshi`.
 
 ## Configuration
 
