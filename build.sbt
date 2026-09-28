@@ -6,6 +6,9 @@ lazy val scala3 = "3.9.0"
 
 ThisBuild / scalaVersion := scala212
 ThisBuild / crossScalaVersions := Seq(scala212, scala3)
+ThisBuild / organization := "com.github.sbt"
+// Existing release tags use bare versions such as 2.2.0.
+ThisBuild / dynverVTagPrefix := false
 
 enablePlugins(SbtPlugin)
 
@@ -13,16 +16,12 @@ sbtPlugin := true
 
 name := """sbt-slick-codegen"""
 
-organization := "com.github.tototoshi"
-
-version := "2.2.0"
-
-crossSbtVersions := Seq("1.12.9", "2.1.0-M2")
+crossSbtVersions := Seq("1.12.9", "2.1.0-M3")
 
 pluginCrossBuild / sbtVersion := {
   scalaBinaryVersion.value match {
     case "2.12" => "1.12.9"
-    case _      => "2.1.0-M2"
+    case _      => "2.1.0-M3"
   }
 }
 
@@ -44,34 +43,50 @@ libraryDependencies ++= Seq(
 
 publishMavenStyle := true
 
-publishTo := {
-  val nexus = "https://oss.sonatype.org/"
-  if (version.value.trim.endsWith("SNAPSHOT")) Some("snapshots" at nexus + "content/repositories/snapshots")
-  else Some("releases" at nexus + "service/local/staging/deploy/maven2")
-}
+pomIncludeRepository := { _ => false }
 
 Test / publishArtifact := false
 
-pomExtra :=
-  <url>https://github.com/tototoshi/sbt-slick-codegen</url>
-  <licenses>
-    <license>
-      <name>Apache License, Version 2.0</name>
-      <url>https://www.apache.org/licenses/LICENSE-2.0.html</url>
-      <distribution>repo</distribution>
-    </license>
-  </licenses>
-  <scm>
-    <url>git@github.com:tototoshi/sbt-slick-codegen</url>
-    <connection>scm:git:git@github.com:tototoshi/sbt-slick-codegen.git</connection>
-  </scm>
-  <developers>
-    <developer>
-      <id>tototoshi</id>
-      <name>Toshiyuki Takahashi</name>
-      <url>https://tototoshi.github.io</url>
-    </developer>
-  </developers>
+ThisBuild / homepage := Some(url("https://github.com/sbt/sbt-slick-codegen"))
+ThisBuild / description := "Generate Slick table mappings from an sbt build"
+ThisBuild / licenses := Seq("Apache-2.0" -> url("https://www.apache.org/licenses/LICENSE-2.0.html"))
+ThisBuild / scmInfo := Some(
+  ScmInfo(
+    url("https://github.com/sbt/sbt-slick-codegen"),
+    "scm:git:git@github.com:sbt/sbt-slick-codegen.git"
+  )
+)
+ThisBuild / developers := List(
+  Developer(
+    id = "tototoshi",
+    name = "Toshiyuki Takahashi",
+    email = "",
+    url = url("https://tototoshi.github.io")
+  )
+)
+
+ThisBuild / githubWorkflowBuild := Seq(WorkflowStep.Sbt(List("test", "scripted")))
+ThisBuild / githubWorkflowArtifactUpload := false
+ThisBuild / githubWorkflowOSes := Seq("ubuntu-latest", "macos-latest")
+ThisBuild / githubWorkflowScalaVersions := Seq(scala212, scala3)
+ThisBuild / githubWorkflowJavaVersions := Seq(JavaSpec.temurin("17"), JavaSpec.temurin("21"), JavaSpec.temurin("25"))
+ThisBuild / githubWorkflowTargetTags := Seq("*")
+ThisBuild / githubWorkflowPublishTargetBranches := Seq(
+  RefPredicate.StartsWith(Ref.Tag("")),
+  RefPredicate.Equals(Ref.Branch("main"))
+)
+ThisBuild / githubWorkflowPublish := Seq(
+  WorkflowStep.Sbt(
+    commands = List("ci-release"),
+    name = Some("Publish project"),
+    env = Map(
+      "PGP_PASSPHRASE" -> "${{ secrets.PGP_PASSPHRASE }}",
+      "PGP_SECRET" -> "${{ secrets.PGP_SECRET }}",
+      "SONATYPE_PASSWORD" -> "${{ secrets.SONATYPE_PASSWORD }}",
+      "SONATYPE_USERNAME" -> "${{ secrets.SONATYPE_USERNAME }}"
+    )
+  )
+)
 
 scriptedBufferLog := false
 scriptedLaunchOpts ++= ManagementFactory.getRuntimeMXBean.getInputArguments.asScala.toList.filter(a =>
